@@ -15,13 +15,14 @@ class Router
   uri_for: (name, params, req=undefined, full=false) =>
     url = @routes[name]
     throw Error("Route: #{name} not found.") unless url
-    route_params = url.match(/:\w+/g) ? []
+    route_params = url.match(/:\w+\??/g) ? []
     for route_param in route_params
       name = route_param[1..]
-      value = params[name]
+      name = name[0...-1] if name.match /\?$/
+      value = params[name] ? ''
       delete params[name]
       url = url.replace route_param, value
-    query = querystring.stringify params
+    query = querystring.unescape querystring.stringify(params)
     url += "?#{query}" if query.length 
     url = "#{req.protocol}://#{req.get 'HOST'}#{url}" if full
     url
