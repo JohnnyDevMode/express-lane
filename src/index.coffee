@@ -9,7 +9,7 @@ class Router
   route: (name, path, middleware..., handler) =>
     @routes[name] = path
     handler_middleware = handler.middleware ? []
-    for verb in [ 'get', 'post', 'put', 'delete', 'all', 'head', 'options' ]
+    for verb in [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'head', 'options' ]
       @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ]))) if handler[verb]?
 
   uri_for: (name, params, req=undefined, full=false) =>
