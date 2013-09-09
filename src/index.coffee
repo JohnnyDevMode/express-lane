@@ -12,7 +12,7 @@ class Router
     for verb in [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'head', 'options' ]
       @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ]))) if handler[verb]?
 
-  uri_for: (name, params, req=undefined, full=false) =>
+  uri_for: (name, params={}, req=undefined, full=false) =>
     url = @routes[name]
     throw Error("Route: #{name} not found.") unless url
     route_params = url.match(/:\w+\??/g) ? []
@@ -23,6 +23,7 @@ class Router
       delete params[name]
       url = url.replace route_param, value
     query = querystring.unescape querystring.stringify(params)
+    url = url.replace /\/$/, ''
     url += "?#{query}" if query.length 
     url = "#{req.protocol}://#{req.get 'HOST'}#{url}" if full
     url
