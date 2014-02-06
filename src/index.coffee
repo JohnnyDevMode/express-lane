@@ -1,3 +1,11 @@
+###
+ * express-lane
+ * https://github.com/devmode/express-lane
+ * 
+ * Copyright (c) 2014 DevMode, Inc.
+ * Licensed under the MIT license.
+###
+
 {compact, flatten} = require 'underscore'
 querystring = require 'querystring'
 
@@ -11,6 +19,11 @@ class Router
     handler_middleware = handler.middleware ? []
     for verb in [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'head', 'options' ]
       @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ]))) if handler[verb]?
+
+  custom: (type, custom...) =>
+    route = @route
+    @[type] = (name, path, middleware..., handler) ->
+      route name, path, custom.concat(middleware)..., handler
 
   uri_for: (name, params={}, req=undefined, full=false) =>
     url = @routes[name]
@@ -28,7 +41,7 @@ class Router
     url = "#{req.protocol}://#{req.get 'HOST'}#{url}" if full
     url
 
-  reverse_routing: () =>
+  middleware: () =>
     uri_for = @uri_for
     (req, res, next) ->
       router =
@@ -44,9 +57,5 @@ class Router
         uri_for: router.uri_for
       next()
 
-  custom: (type, custom...) =>
-    route = @route
-    @[type] = (name, path, middleware..., handler) ->
-      route name, path, custom.concat(middleware)..., handler
-
-module.exports = Router
+module.exports = (app) ->
+  new Router app

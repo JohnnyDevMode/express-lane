@@ -1,5 +1,4 @@
-bin
+dist
 node_modules
-config/runtime.json
 *.sublime-workspace
 
