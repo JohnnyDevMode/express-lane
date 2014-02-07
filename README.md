@@ -18,23 +18,23 @@ Express Lane was writtern to improve the experience of writing RESTFul Express a
 
 ```coffee
 express = require 'express'
-express_lane = require('express-lane')
+express_lane = require 'express-lane'
 
 app = express()
-router = express_lane(app)
+router = express_lane app
 
 # configure a custom route type for page requests
 router.custom 'page',
-  express.cookieParser(config.session.secret)
-  session.middleware(app)
+  express.cookieParser config.session.secret
+  session.middleware app
   flash()
-  helpers(app)
+  helpers app
 
 # configure a custom router type for API calls
 router.custom 'api'
 
 app.configure () ->
-  app.use express.static(public_dir)
+  app.use express.static public_dir
   # ...
   app.use router.middleware()
   app.use express.router
@@ -42,7 +42,7 @@ app.configure () ->
 
 # map the routes ...
 
-app.listen(process.env.PORT || 3000)
+app.listen process.env.PORT or 3000
 ```
 
 ### Map The Routes
