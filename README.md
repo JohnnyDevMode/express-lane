@@ -33,7 +33,7 @@ router.custom 'page',
 # configure a custom router type for API calls
 router.custom 'api'
 
-app.configure () ->
+app.configure ->
   app.use express.static public_dir
   # ...
   app.use router.middleware()
