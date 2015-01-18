@@ -1,7 +1,7 @@
 ###
  * express-lane
  * https://github.com/devmode/express-lane
- * 
+ *
  * Copyright (c) 2014 DevMode, Inc.
  * Licensed under the MIT license.
 ###
@@ -37,7 +37,7 @@ class Router
       url = url.replace route_param, value
     query = querystring.unescape querystring.stringify(params)
     url = url.replace /\/$/, ''
-    url += "?#{query}" if query.length 
+    url += "?#{query}" if query.length
     url = "#{req.protocol}://#{req.get 'HOST'}#{url}" if full
     url
 
@@ -52,9 +52,8 @@ class Router
         redirect_to: (name, params, full=false) =>
           res.redirect uri_for name, params, req, full
       res[name] = value for name, value of router
-      res.locals 
-        path_for: router.path_for
-        uri_for: router.uri_for
+      res.locals.path_for = router.path_for
+      res.locals.uri_for = router.uri_for
       next()
 
 module.exports = (app) ->
