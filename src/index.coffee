@@ -36,7 +36,7 @@ class Router
       delete params[name]
       url = url.replace route_param, value
     query = querystring.unescape querystring.stringify(params)
-    url = url.replace /\/$/, ''
+    url = url.replace /\/$/, '' if url.length > 1
     url += "?#{query}" if query.length
     url = "#{req.protocol}://#{req.get 'HOST'}#{url}" if full
     url
