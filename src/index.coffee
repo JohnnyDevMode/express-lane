@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
 ###
 
-{compact, flatten} = require 'underscore'
+{compact, flatten, select, reject} = require 'underscore'
 querystring = require 'querystring'
 
 class Router
@@ -17,8 +17,16 @@ class Router
   route: (name, path, middleware..., handler) =>
     @routes[name] = path
     handler_middleware = handler.middleware ? []
-    for verb in [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'head', 'options' ]
-      @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ]))) if handler[verb]?
+    methods = [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'head', 'options' ]
+    supported = select methods, (verb) -> handler[verb]?
+    unsupported = reject methods, (verb) -> handler[verb]?
+    for verb in supported
+      @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ])))
+    for verb in unsupported
+      unsupported_method = (req, res, next) ->
+        res.set 'allow', (verb.toUpperCase() for verb in supported).join ','
+        res.sendStatus 405
+      @app[verb](path, unsupported_method)
 
   custom: (type, custom...) =>
     route = @route
