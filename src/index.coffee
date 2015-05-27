@@ -2,26 +2,45 @@
  * express-lane
  * https://github.com/devmode/express-lane
  *
- * Copyright (c) 2014 DevMode, Inc.
+ * Copyright (c) 2015 Sean M. Duncan
  * Licensed under the MIT license.
 ###
 
-{compact, flatten, select, reject} = require 'underscore'
+{compact, flatten, select, reject, isArray, isFunction} = require 'underscore'
 querystring = require 'querystring'
+
+class Builder
+
+  constructor: (@router, @configurator) ->
+    @middleware = []
+
+  add: (verbs..., middleware) ->
+    verbs = [ 'all' ] unless verbs.length
+    binding = {}
+    binding[verb] = middleware for verb in verbs
+    @middleware.push binding
+
+  build: ->
+    @configurator.apply @
+    (name, path, middleware..., handler) =>
+      @router.route name, path, @middleware.concat(middleware)..., handler
 
 class Router
 
   constructor: (@app) ->
     @routes = {}
 
-  route: (name, path, middleware..., handler) =>
+  route: (name, path, bindings..., handler) =>
     @routes[name] = path
-    handler_middleware = handler.middleware ? []
     methods = [ 'get', 'post', 'put', 'patch', 'delete', 'all', 'options' ]
     supported = select methods, (verb) -> handler[verb]?
     unsupported = reject methods, (verb) -> handler[verb]?
+    for it, index in bindings
+      bindings[index] = all: it if isFunction it or isArray it
     for verb in supported
-      @app[verb](path, compact(flatten([ middleware, handler.middleware, handler[verb] ])))
+      middleware = compact(flatten(binding[verb] ? binding.all for binding in bindings))
+      stack = compact(flatten([ middleware, handler.middleware, handler[verb] ]))
+      @app[verb](path, stack)
     supported.push 'head' if 'get' in supported
     for verb in unsupported
       unsupported_method = (req, res, next) ->
@@ -30,9 +49,11 @@ class Router
       @app[verb](path, unsupported_method)
 
   custom: (type, custom...) =>
-    route = @route
-    @[type] = (name, path, middleware..., handler) ->
-      route name, path, custom.concat(middleware)..., handler
+    if custom.length is 1 and isFunction(custom[0]) and custom[0].length is 0
+      @[type] = new Builder(@, custom[0]).build()
+    else
+      @[type] = (name, path, middleware..., handler) =>
+        @route name, path, custom.concat(middleware)..., handler
 
   uri_for: (name, params={}, req=undefined, full=false) =>
     url = @routes[name]
