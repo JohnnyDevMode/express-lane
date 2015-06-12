@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
 ###
 
-{compact, flatten, select, reject, isArray, isFunction} = require 'underscore'
+{ compact, flatten, select, reject, isArray, isFunction } = require 'lodash'
 querystring = require 'querystring'
 
 class Builder
