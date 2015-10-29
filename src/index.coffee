@@ -38,9 +38,12 @@ class Router
     for it, index in bindings
       bindings[index] = all: it if isFunction it or isArray it
     for verb in supported
-      middleware = compact(flatten(binding[verb] ? binding.all for binding in bindings))
-      stack = compact(flatten([ middleware, handler.middleware, handler[verb] ]))
-      @app[verb](path, stack)
+      middleware = compact flatten (binding[verb] ? binding.all for binding in bindings), true
+      stack = compact flatten [ middleware, handler.middleware, handler[verb] ], true
+      @app[verb] path, flatten [
+        select stack, (it) -> it.length < 4 # req middleware
+        select stack, (it) -> it.length > 3 # err middleware
+      ], true
     supported.push 'head' if 'get' in supported
     for verb in unsupported
       unsupported_method = (req, res, next) ->

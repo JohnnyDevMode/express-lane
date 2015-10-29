@@ -1,6 +1,6 @@
 {
   "name": "express-lane",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "an express routing extension that provides named, resourceful and reversible routes",
   "keywords": [
     "express",
