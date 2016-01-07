@@ -45,6 +45,10 @@ class Router
         select stack, (it) -> it.length > 3 # err middleware
       ], true
     supported.push 'head' if 'get' in supported
+    unless 'options' in supported
+      @app.options path, (req, res, next) ->
+        res.set 'allow', (verb.toUpperCase() for verb in supported).join ', '
+        res.send 200
     for verb in unsupported
       unsupported_method = (req, res, next) ->
         res.set 'allow', (verb.toUpperCase() for verb in supported).join ', '
